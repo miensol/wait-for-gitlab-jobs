@@ -1,0 +1,30 @@
+{
+  "name": "wait-for-gitlab-jobs",
+  "version": "1.0.0",
+  "description": "Wait for all other jobs in the current pipeline to complete",
+  "bin": {
+    "wait-for-gitlab-jobs": "dist/cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-run": "tsc && node ./dist/cli.js",
+    "build-publish": "tsc && npm publish",
+    "tsc:watch": "tsc --watch"
+  },
+  "keywords": [
+    "gitlab",
+    "variables",
+    "export",
+    "cicd"
+  ],
+  "author": "Piotr Mionskowski",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.3.2",
+    "@types/node": "^14.14.33"
+  },
+  "dependencies": {
+    "@gitbeaker/node": "^29.2.0",
+    "commander": "^7.1.0"
+  }
+}
