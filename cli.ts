@@ -3,24 +3,27 @@
 import { Jobs } from '@gitbeaker/node';
 import { Command } from 'commander';
 
+type Options = {
+  accessToken: string
+  excludeJob?: string
+  project: string
+  pipeline: string
+};
+
 async function main() {
   const program = new Command();
 
-  program.option("-u, --url <url>", "Gitlab Url", "https://gitlab.com")
+  program.requiredOption("-p, --project <projectId>", "Gitlab project id", process.env.CI_PROJECT_ID)
 
-  program.requiredOption("-p, --project <project>", "Gitlab project id", process.env.CI_PROJECT_ID)
-
-  program.requiredOption("--pipeline <pipeline>", "Gitlab pipeline id", process.env.CI_PIPELINE_ID)
+  program.requiredOption("--pipeline <pipelineId>", "Gitlab pipeline id", process.env.CI_PIPELINE_ID)
 
   program.option("--exclude-job <excludeJobId>", "Gitlab job id to exclude", process.env.CI_JOB_ID)
 
   program.requiredOption("-t, --access-token <accessToken>", "Gitlab API Access Token", process.env.GITLAB_ACCESS_TOKEN)
 
-  program.option("-e, --environment <environment>", "Only export variables for this environment name", process.env.CI_ENVIRONMENT_NAME)
-
   program.parse()
 
-  const opts = program.opts();
+  const opts = program.opts() as Options;
 
   const jobs = new Jobs({
     token: opts.accessToken,
@@ -28,14 +31,20 @@ async function main() {
 
   let allJobsFinished = false;
 
-  const jobIdToExclude = opts.excludeJobId ? parseInt(opts.excludeJobId) : undefined
+  const excludeJobId = opts.excludeJob ? parseInt(opts.excludeJob) : undefined
 
+  const pipelineId = parseInt(opts.pipeline);
+
+  console.log('Will wait for jobs from project', opts.project, 'and pipeline', pipelineId)
+  if (excludeJobId) {
+    console.log('except for job with id', excludeJobId)
+  }
   do {
-    const allPipelineJobsBad = await jobs.showPipelineJobs(opts.project, opts.pipeline);
+    const allPipelineJobsBad = await jobs.showPipelineJobs(opts.project, pipelineId);
     // I think there's a bug in showPipelineJobs as it returns a single JobSchema
     const allPipelineJobsFixed = allPipelineJobsBad as unknown as (typeof allPipelineJobsBad)[]
 
-    const relevantJobs = allPipelineJobsFixed.filter(job => job.id !== jobIdToExclude)
+    const relevantJobs = allPipelineJobsFixed.filter(job => job.id !== excludeJobId)
 
     const unfinishedJobs = relevantJobs.filter(job => !job.finished_at);
 

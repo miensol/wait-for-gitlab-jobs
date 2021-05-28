@@ -1,6 +1,6 @@
 {
   "name": "wait-for-gitlab-jobs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Wait for all other jobs in the current pipeline to complete",
   "bin": {
     "wait-for-gitlab-jobs": "dist/cli.js"
